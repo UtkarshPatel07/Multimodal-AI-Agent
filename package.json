@@ -1,0 +1,17 @@
+{
+  "name": "multimodal-explanation-system",
+  "version": "1.0.0",
+  "description": "Multimodal AI Explanation System with Voice and Image",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && python app.py",
+    "client": "cd frontend && npm run dev",
+    "install-all": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install"
+  },
+  "keywords": ["multimodal", "ai", "vision", "voice", "explanation"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
