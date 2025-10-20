@@ -5,10 +5,17 @@ from dotenv import load_dotenv
 import base64
 from io import BytesIO
 from services.vision_service import VisionService
-from services.speech_service import SpeechService
 from services.reasoning_service import ReasoningService
 from services.annotation_service import AnnotationService
 import json
+
+# Try to import speech service (optional for production)
+try:
+    from services.speech_service import SpeechService
+    SPEECH_ENABLED = True
+except ImportError:
+    SPEECH_ENABLED = False
+    print("⚠️ Speech service not available (Whisper not installed)")
 
 load_dotenv()
 
@@ -17,7 +24,7 @@ CORS(app)
 
 # Initialize services
 vision_service = VisionService()
-speech_service = SpeechService()
+speech_service = SpeechService() if SPEECH_ENABLED else None
 reasoning_service = ReasoningService()
 annotation_service = AnnotationService()
 
@@ -76,6 +83,9 @@ def upload_image():
 def speech_to_text():
     """Convert speech audio to text"""
     try:
+        if not SPEECH_ENABLED or speech_service is None:
+            return jsonify({"error": "Speech recognition not available in this deployment"}), 503
+        
         if 'audio' not in request.files:
             return jsonify({"error": "No audio provided"}), 400
         
