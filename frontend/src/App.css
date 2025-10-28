@@ -257,3 +257,16 @@
   color: #fff;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
+
+
+/* Info Message */
+.info-message {
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #2196f3;
+  text-align: center;
+  font-size: 0.95rem;
+}

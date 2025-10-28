@@ -21,6 +21,7 @@ function App() {
   const [audioUrl, setAudioUrl] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [speechAvailable, setSpeechAvailable] = useState(true) // Check if speech is available
 
   const handleImageUpload = async (file) => {
     try {
@@ -124,7 +125,15 @@ function App() {
       
     } catch (err) {
       console.error('Voice query error:', err)
-      setError(err.response?.data?.error || 'Failed to process voice query')
+      const errorMsg = err.response?.data?.error || 'Failed to process voice query'
+      
+      // Show user-friendly message for speech not available
+      if (err.response?.status === 503 || errorMsg.includes('not available')) {
+        setSpeechAvailable(false)
+        setError('Voice recording is not available. Please type your question instead.')
+      } else {
+        setError(errorMsg)
+      }
       setLoading(false)
     }
   }
@@ -146,20 +155,22 @@ function App() {
         <h1>🎯 Multimodal Explanation System</h1>
         <p>Upload an image, ask a question (text or voice), and get an AI-powered explanation</p>
         
-        <div className="mode-switcher">
-          <button 
-            className={`mode-btn ${mode === 'standard' ? 'active' : ''}`}
-            onClick={() => setMode('standard')}
-          >
-            📝 Standard Mode
-          </button>
-          <button 
-            className={`mode-btn ${mode === 'streaming' ? 'active' : ''}`}
-            onClick={() => setMode('streaming')}
-          >
-            🎤 Streaming Voice Chat (NEW!)
-          </button>
-        </div>
+        {speechAvailable && (
+          <div className="mode-switcher">
+            <button 
+              className={`mode-btn ${mode === 'standard' ? 'active' : ''}`}
+              onClick={() => setMode('standard')}
+            >
+              📝 Standard Mode
+            </button>
+            <button 
+              className={`mode-btn ${mode === 'streaming' ? 'active' : ''}`}
+              onClick={() => setMode('streaming')}
+            >
+              🎤 Streaming Voice Chat (NEW!)
+            </button>
+          </div>
+        )}
       </header>
 
       <main className="app-main">
@@ -188,27 +199,33 @@ function App() {
             <div className="query-section">
             <h2>Ask a Question</h2>
             
-            {/* Microphone Test Tool */}
-            <MicrophoneTest />
-            
             <QueryInput 
               onSubmit={handleQuerySubmit}
               disabled={!sessionId || loading}
             />
-            <div className="voice-section">
-              <p>Or use voice:</p>
-              <VoiceRecorder 
-                onRecordingComplete={handleVoiceQuery}
-                disabled={!sessionId || loading}
-                onTranscriptChange={(text) => {
-                  // Update query input with voice transcript in real-time
-                  const textarea = document.querySelector('.query-textarea')
-                  if (textarea) {
-                    textarea.value = text
-                  }
-                }}
-              />
-            </div>
+            
+            {speechAvailable && (
+              <div className="voice-section">
+                <p>Or use voice:</p>
+                <VoiceRecorder 
+                  onRecordingComplete={handleVoiceQuery}
+                  disabled={!sessionId || loading}
+                  onTranscriptChange={(text) => {
+                    // Update query input with voice transcript in real-time
+                    const textarea = document.querySelector('.query-textarea')
+                    if (textarea) {
+                      textarea.value = text
+                    }
+                  }}
+                />
+              </div>
+            )}
+            
+            {!speechAvailable && (
+              <div className="info-message">
+                ℹ️ Voice input is not available. Please type your questions.
+              </div>
+            )}
           </div>
 
             {loading && (
